@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/books?currentSchema=books_schema
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  main:
+    banner-mode: off
+  jpa:
+    generate-ddl: true
+    open-in-view: false
+
+
