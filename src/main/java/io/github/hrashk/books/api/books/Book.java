@@ -1,5 +1,6 @@
 package io.github.hrashk.books.api.books;
 
+import io.github.hrashk.books.api.categories.Category;
 import io.github.hrashk.books.api.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -23,4 +24,7 @@ public class Book implements BaseEntity {
 
     @Column(nullable = false)
     private String author;
+
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
+    private Category category;
 }

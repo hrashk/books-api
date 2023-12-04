@@ -64,6 +64,7 @@ public final class DataSeeder {
         Book book = new Book().toBuilder()
                 .title(faker.book().title())
                 .author(faker.book().author())
+                .category(randomItem(categories))
                 .build();
 
         return book;
