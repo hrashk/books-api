@@ -1,6 +1,7 @@
 package io.github.hrashk.books.api.books;
 
 import io.github.hrashk.books.api.books.web.BookResponse;
+import io.github.hrashk.books.api.exceptions.ErrorInfo;
 import io.github.hrashk.books.api.util.ControllerTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,18 @@ public class BooksControllerTests extends ControllerTest {
                 () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK),
                 () -> assertThat(response.getBody()).hasNoNullFieldsOrProperties(),
                 () -> assertThat(response.getBody().id()).isEqualTo(bookId)
+        );
+    }
+
+    @Test
+    void findMissing() {
+        Long bookId = INVALID_ID;
+
+        ResponseEntity<ErrorInfo> response = rest.getForEntity(BOOKS_ID_URL, ErrorInfo.class, bookId);
+
+        assertAll(
+                () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND),
+                () -> assertThat(response.getBody().message()).contains("Book")
         );
     }
 }
