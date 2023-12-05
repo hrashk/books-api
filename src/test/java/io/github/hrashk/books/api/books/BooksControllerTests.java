@@ -77,4 +77,45 @@ public class BooksControllerTests extends ControllerTest {
                 () -> assertThat(response.getBody().message()).contains("title", "author", "category")
         );
     }
+
+    @Test
+    void updateAuthor() {
+        var book = seeder.books().get(0);
+        UpsertRequest request = new UpsertRequest(book.getTitle(), "asdf", book.getCategory().getName());
+
+        ResponseEntity<BookResponse> response = put(BOOKS_ID_URL, request, BookResponse.class, book.getId());
+
+        assertAll(
+                () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK),
+                () -> assertThat(response.getBody()).hasNoNullFieldsOrProperties(),
+                () -> assertThat(response.getBody().author()).isEqualTo("asdf")
+        );
+    }
+
+    @Test
+    void updateCategory() {
+        var book = seeder.books().get(0);
+        String category = seeder.aRandomCategory().getName();
+        UpsertRequest request = new UpsertRequest(book.getTitle(), book.getAuthor(), category);
+
+        ResponseEntity<BookResponse> response = put(BOOKS_ID_URL, request, BookResponse.class, book.getId());
+
+        assertAll(
+                () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK),
+                () -> assertThat(response.getBody()).hasNoNullFieldsOrProperties(),
+                () -> assertThat(response.getBody().category()).isEqualTo(category)
+        );
+    }
+
+    @Test
+    void updateMissing() {
+        UpsertRequest request = new UpsertRequest("t", "a", "c");
+
+        ResponseEntity<BookResponse> response = put(BOOKS_ID_URL, request, BookResponse.class, INVALID_ID);
+
+        assertAll(
+                () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED),
+                () -> assertThat(response.getBody()).hasNoNullFieldsOrProperties()
+        );
+    }
 }

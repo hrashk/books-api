@@ -16,11 +16,23 @@ public class BookService extends BaseService<Book, BookRepository> {
 
     @Override
     public Long add(Book book) {
+        getOrAddCategory(book);
+
+        return super.add(book);
+    }
+
+    @Override
+    public Long updateOrAdd(Long id, Book book) {
+        getOrAddCategory(book);
+
+        return super.updateOrAdd(id, book);
+    }
+
+    private void getOrAddCategory(Book book) {
         String categoryName = book.getCategory().getName();
 
         Category category = categoryService.getOrAdd(categoryName);
-        book.setCategory(category);
 
-        return super.add(book);
+        book.setCategory(category);
     }
 }
