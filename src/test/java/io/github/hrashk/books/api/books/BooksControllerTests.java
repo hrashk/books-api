@@ -1,6 +1,7 @@
 package io.github.hrashk.books.api.books;
 
 import io.github.hrashk.books.api.books.web.BookResponse;
+import io.github.hrashk.books.api.books.web.UpsertRequest;
 import io.github.hrashk.books.api.exceptions.ErrorInfo;
 import io.github.hrashk.books.api.util.ControllerTest;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,44 @@ public class BooksControllerTests extends ControllerTest {
         assertAll(
                 () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND),
                 () -> assertThat(response.getBody().message()).contains("Book")
+        );
+    }
+
+    @Test
+    void add() {
+        String existingCategory = seeder.categories().get(4).getName();
+        addBookWithCategory(existingCategory);
+    }
+
+    @Test
+    void addWithNewCategory() {
+        String newCategory = seeder.aRandomCategory().getName();
+        addBookWithCategory(newCategory);
+    }
+
+    private void addBookWithCategory(String categoryName) {
+        UpsertRequest request = new UpsertRequest("t", "a", categoryName);
+
+        ResponseEntity<BookResponse> response = rest.postForEntity(BOOKS_URL, request, BookResponse.class);
+
+        assertAll(
+                () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED),
+                () -> assertThat(response.getBody()).hasNoNullFieldsOrProperties(),
+                () -> assertThat(response.getBody().author()).isEqualTo("a"),
+                () -> assertThat(response.getBody().category()).isEqualTo(categoryName),
+                () -> assertThat(response.getBody().title()).isEqualTo("t")
+        );
+    }
+
+    @Test
+    void addBroken() {
+        UpsertRequest request = new UpsertRequest("", "  ", null);
+
+        ResponseEntity<ErrorInfo> response = rest.postForEntity(BOOKS_URL, request, ErrorInfo.class);
+
+        assertAll(
+                () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST),
+                () -> assertThat(response.getBody().message()).contains("title", "author", "category")
         );
     }
 }
