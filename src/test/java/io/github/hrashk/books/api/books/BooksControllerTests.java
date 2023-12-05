@@ -118,4 +118,18 @@ public class BooksControllerTests extends ControllerTest {
                 () -> assertThat(response.getBody()).hasNoNullFieldsOrProperties()
         );
     }
+
+    @Test
+    void delete() {
+        Long bookId = seeder.books().get(0).getId();
+
+        ResponseEntity<Void> response = delete(BOOKS_ID_URL, bookId);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+
+        ResponseEntity<ErrorInfo> findResponse = rest.getForEntity(BOOKS_ID_URL, ErrorInfo.class, bookId);
+        assertAll(
+                () -> assertThat(findResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND),
+                () -> assertThat(findResponse.getBody().message()).contains("Book")
+        );
+    }
 }

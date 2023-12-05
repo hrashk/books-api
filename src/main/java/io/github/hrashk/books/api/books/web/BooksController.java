@@ -32,6 +32,7 @@ public class BooksController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
     @PutMapping("/{id}")
     public ResponseEntity<BookResponse> update(@PathVariable Long id, @RequestBody @Valid UpsertRequest request) {
         Long newId = service.updateOrAdd(id, mapper.map(request));
@@ -42,5 +43,12 @@ public class BooksController {
             return ResponseEntity.ok(response);
         else
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        service.deleteById(id);
+
+        return ResponseEntity.noContent().build();
     }
 }
