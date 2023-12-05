@@ -132,4 +132,16 @@ public class BooksControllerTests extends ControllerTest {
                 () -> assertThat(findResponse.getBody().message()).contains("Book")
         );
     }
+
+    @Test
+    void deleteMissing() {
+        Long bookId = INVALID_ID;
+
+        ResponseEntity<ErrorInfo> response = delete(BOOKS_ID_URL, ErrorInfo.class, bookId);
+
+        assertAll(
+                () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND),
+                () -> assertThat(response.getBody().message()).contains("Book")
+        );
+    }
 }

@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.Objects;
 
 @RestController
@@ -42,7 +43,7 @@ public class BooksController {
         if (Objects.equals(newId, id))
             return ResponseEntity.ok(response);
         else
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            return ResponseEntity.created(URI.create("/" + newId)).body(response);
     }
 
     @DeleteMapping("/{id}")
