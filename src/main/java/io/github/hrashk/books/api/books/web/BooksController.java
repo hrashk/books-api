@@ -3,7 +3,6 @@ package io.github.hrashk.books.api.books.web;
 import io.github.hrashk.books.api.books.BookService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +30,11 @@ public class BooksController {
 
         BookResponse response = mapper.map(service.findById(id));
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return created(id, response);
+    }
+
+    private static ResponseEntity<BookResponse> created(Long id, BookResponse response) {
+        return ResponseEntity.created(URI.create("/" + id)).body(response);
     }
 
     @PutMapping("/{id}")
@@ -43,7 +46,7 @@ public class BooksController {
         if (Objects.equals(newId, id))
             return ResponseEntity.ok(response);
         else
-            return ResponseEntity.created(URI.create("/" + newId)).body(response);
+            return created(newId, response);
     }
 
     @DeleteMapping("/{id}")

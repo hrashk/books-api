@@ -12,9 +12,13 @@ import org.springframework.boot.test.context.TestComponent;
 
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 @TestComponent
 @RequiredArgsConstructor
@@ -40,18 +44,28 @@ public final class DataSeeder {
         booksRepo.flush();
     }
 
+    public void clear() {
+        booksRepo.deleteAll();
+        categoryRepo.deleteAll();
+    }
+
     public Iterable<Category> sampleCategories(int count) {
-        return generateSample(count, this::aRandomCategory);
+        return generateSample(count, this::aRandomCategory, Category::getName);
     }
 
     public Iterable<Book> sampleBooks(int count) {
-        return generateSample(count, this::aRandomBook);
+        return generateSample(count, this::aRandomBook, b -> b);
     }
 
-    private <T> List<T> generateSample(int count, Supplier<T> entityGenerator) {
-        return LongStream.range(1, count + 1)
-                .mapToObj(id -> entityGenerator.get())
-                .toList();
+    private <T> List<T> generateSample(int count, Supplier<T> entityGenerator, Function<? super T, ?> keyExtractor) {
+        return Stream.generate(entityGenerator)
+                .filter(distinctByKey(keyExtractor))
+                .limit(count).toList();
+    }
+
+    public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
+        Set<Object> seen = ConcurrentHashMap.newKeySet();
+        return t -> seen.add(keyExtractor.apply(t));
     }
 
     public Category aRandomCategory() {

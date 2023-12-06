@@ -1,5 +1,6 @@
 package io.github.hrashk.books.api.util;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -18,5 +19,10 @@ public abstract class ServiceTest {
     @BeforeEach
     void seedSamples() {
         seeder.seed(10);
+    }
+
+    @AfterEach
+    void deleteAllEntities() {
+        seeder.clear();
     }
 }
