@@ -59,11 +59,11 @@ public class BooksController {
 
         BookResponse response = mapper.map(service.findById(id));
 
-        return created(id, response);
+        return created(response);
     }
 
-    private static ResponseEntity<BookResponse> created(Long id, BookResponse response) {
-        return ResponseEntity.created(URI.create("/" + id)).body(response);
+    private static ResponseEntity<BookResponse> created(BookResponse response) {
+        return ResponseEntity.created(URI.create("/" + response.id())).body(response);
     }
 
     @PutMapping("/{id}")
@@ -75,7 +75,7 @@ public class BooksController {
         if (Objects.equals(newId, id))
             return ResponseEntity.ok(response);
         else
-            return created(newId, response);
+            return created(response);
     }
 
     @DeleteMapping("/{id}")
