@@ -30,7 +30,7 @@ public class BooksControllerTests extends ControllerTest {
     void findByCategory() {
         String category = seeder.books().get(0).getCategory().getName();
 
-        ResponseEntity<BookListResponse> response = rest.getForEntity(BOOKS_URL + "?category={c}",
+        ResponseEntity<BookListResponse> response = rest.getForEntity(BOOKS_URL + "/by-category?category={c}",
                 BookListResponse.class, category);
 
         assertAll(
