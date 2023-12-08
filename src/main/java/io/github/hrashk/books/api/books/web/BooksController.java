@@ -44,6 +44,15 @@ public class BooksController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/by-title-and-author")
+    public ResponseEntity<BookResponse> findByTitleAndAuthor(@RequestParam String title, @RequestParam String author) {
+        Book book = service.findByTitleAndAuthor(title, author);
+
+        BookResponse response = mapper.map(book);
+
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<BookResponse> getById(@PathVariable Long id) {
         BookResponse response = mapper.map(service.findById(id));

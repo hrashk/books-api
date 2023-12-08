@@ -3,6 +3,7 @@ package io.github.hrashk.books.api.books;
 import io.github.hrashk.books.api.categories.Category;
 import io.github.hrashk.books.api.categories.CategoryService;
 import io.github.hrashk.books.api.common.BaseService;
+import io.github.hrashk.books.api.exceptions.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,6 +23,12 @@ public class BookService extends BaseService<Book, BookRepository> {
 
     public List<Book> findByCategory(String category) {
         return repository.findByCategoryName(category);
+    }
+
+    public Book findByTitleAndAuthor(String title, String author) {
+        return repository.findByTitleAndAuthor(title, author)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "No book found with title '%s' by %s".formatted(title, author)));
     }
 
     @Override

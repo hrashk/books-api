@@ -42,6 +42,36 @@ public class BooksControllerTests extends ControllerTest {
     }
 
     @Test
+    void findByTitleAndAuthor() {
+        var book = seeder.books().get(0);
+
+        ResponseEntity<BookResponse> response = rest.getForEntity(BOOKS_URL
+                        + "/by-title-and-author?title={t}&author={a}",
+                BookResponse.class, book.getTitle(), book.getAuthor());
+
+        assertAll(
+                () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK),
+                () -> assertThat(response.getBody()).hasNoNullFieldsOrProperties(),
+                () -> assertThat(response.getBody().title()).isEqualTo(book.getTitle()),
+                () -> assertThat(response.getBody().author()).isEqualTo(book.getAuthor())
+        );
+    }
+
+    @Test
+    void findMissingByTitleAndAuthor() {
+        var book = seeder.books().get(0);
+
+        ResponseEntity<ErrorInfo> response = rest.getForEntity(BOOKS_URL
+                        + "/by-title-and-author?title={t}&author={a}",
+                ErrorInfo.class, "ttt", "aaa");
+
+        assertAll(
+                () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND),
+                () -> assertThat(response.getBody().message()).contains("book")
+        );
+    }
+
+    @Test
     void findById() {
         Long bookId = seeder.books().get(0).getId();
 
