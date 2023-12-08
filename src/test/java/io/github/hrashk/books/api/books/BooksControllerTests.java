@@ -1,5 +1,6 @@
 package io.github.hrashk.books.api.books;
 
+import io.github.hrashk.books.api.books.web.BookListResponse;
 import io.github.hrashk.books.api.books.web.BookResponse;
 import io.github.hrashk.books.api.books.web.UpsertRequest;
 import io.github.hrashk.books.api.exceptions.ErrorInfo;
@@ -14,6 +15,21 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 public class BooksControllerTests extends ControllerTest {
     private static final String BOOKS_URL = "/api/v1/books";
     private static final String BOOKS_ID_URL = BOOKS_URL + "/{id}";
+
+    @Test
+    void findByCategory() {
+        String category = seeder.books().get(0).getCategory().getName();
+
+        ResponseEntity<BookListResponse> response = rest.getForEntity(BOOKS_URL + "?category={c}",
+                BookListResponse.class, category);
+
+        assertAll(
+                () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK),
+                () -> assertThat(response.getBody().books()).isNotEmpty(),
+                () -> assertThat(response.getBody().books()).allSatisfy(b ->
+                        assertThat(b.category()).isEqualTo(category))
+        );
+    }
 
     @Test
     void findById() {

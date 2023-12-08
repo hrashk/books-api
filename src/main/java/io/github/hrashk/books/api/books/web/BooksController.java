@@ -1,5 +1,6 @@
 package io.github.hrashk.books.api.books.web;
 
+import io.github.hrashk.books.api.books.Book;
 import io.github.hrashk.books.api.books.BookService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Objects;
 
 @RestController
@@ -16,6 +18,15 @@ import java.util.Objects;
 public class BooksController {
     private final BookService service;
     private final BookMapper mapper;
+
+    @GetMapping
+    public ResponseEntity<BookListResponse> findByCategory(@RequestParam String category) {
+        List<Book> books = service.findByCategory(category);
+
+        BookListResponse response = mapper.wrap(books);
+
+        return ResponseEntity.ok(response);
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<BookResponse> getById(@PathVariable Long id) {

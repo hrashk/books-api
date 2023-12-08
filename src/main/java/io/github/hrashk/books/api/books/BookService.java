@@ -5,6 +5,8 @@ import io.github.hrashk.books.api.categories.CategoryService;
 import io.github.hrashk.books.api.common.BaseService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class BookService extends BaseService<Book, BookRepository> {
     private final CategoryService categoryService;
@@ -12,6 +14,10 @@ public class BookService extends BaseService<Book, BookRepository> {
     public BookService(BookRepository repository, CategoryService categoryService) {
         super(repository, "Book");
         this.categoryService = categoryService;
+    }
+
+    public List<Book> findByCategory(String category) {
+        return repository.findByCategoryName(category);
     }
 
     @Override
