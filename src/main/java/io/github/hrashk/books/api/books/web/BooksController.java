@@ -2,6 +2,10 @@ package io.github.hrashk.books.api.books.web;
 
 import io.github.hrashk.books.api.books.Book;
 import io.github.hrashk.books.api.books.BookService;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -19,7 +23,19 @@ public class BooksController {
     private final BookService service;
     private final BookMapper mapper;
 
+    @Operation(summary = "find books",
+            parameters = {@Parameter(name = "category", schema = @Schema(name = "string"))})
     @GetMapping
+    public ResponseEntity<BookListResponse> findAll() {
+        List<Book> books = service.findAll();
+
+        BookListResponse response = mapper.wrap(books);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Hidden
+    @GetMapping(params = "category")
     public ResponseEntity<BookListResponse> findByCategory(@RequestParam String category) {
         List<Book> books = service.findByCategory(category);
 

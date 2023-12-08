@@ -16,6 +16,10 @@ public class BookService extends BaseService<Book, BookRepository> {
         this.categoryService = categoryService;
     }
 
+    public List<Book> findAll() {
+        return repository.findAll();
+    }
+
     public List<Book> findByCategory(String category) {
         return repository.findByCategoryName(category);
     }
