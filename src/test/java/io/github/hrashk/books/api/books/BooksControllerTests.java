@@ -59,8 +59,6 @@ public class BooksControllerTests extends ControllerTest {
 
     @Test
     void findMissingByTitleAndAuthor() {
-        var book = seeder.books().get(0);
-
         ResponseEntity<ErrorInfo> response = rest.getForEntity(BOOKS_URL
                         + "/by-title-and-author?title={t}&author={a}",
                 ErrorInfo.class, "ttt", "aaa");
@@ -104,7 +102,7 @@ public class BooksControllerTests extends ControllerTest {
 
     @Test
     void addWithNewCategory() {
-        String newCategory = seeder.aRandomCategory().getName();
+        String newCategory = "random-cat";
         addBookWithCategory(newCategory);
     }
 
@@ -119,6 +117,30 @@ public class BooksControllerTests extends ControllerTest {
                 () -> assertThat(response.getBody().author()).isEqualTo("a"),
                 () -> assertThat(response.getBody().category()).isEqualTo(categoryName),
                 () -> assertThat(response.getBody().title()).isEqualTo("t")
+        );
+    }
+
+    @Test
+    void addExistingBookWithNewCategory() {
+        String newCategory = "random-cat";
+        var book = seeder.books().get(0);
+        UpsertRequest request = new UpsertRequest(book.getTitle(), book.getAuthor(), newCategory);
+
+        ResponseEntity<BookResponse> response = rest.postForEntity(BOOKS_URL, request, BookResponse.class);
+
+        assertAll(
+                () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED),
+                () -> assertThat(response.getBody()).hasNoNullFieldsOrProperties(),
+                () -> assertThat(response.getBody().category()).isEqualTo(newCategory)
+        );
+
+        ResponseEntity<BookResponse> findResponse = rest.getForEntity(BOOKS_URL
+                        + "/by-title-and-author?title={t}&author={a}",
+                BookResponse.class, book.getTitle(), book.getAuthor());
+
+        assertAll(
+                () -> assertThat(findResponse.getStatusCode()).isEqualTo(HttpStatus.OK),
+                () -> assertThat(findResponse.getBody()).hasNoNullFieldsOrProperties()
         );
     }
 
