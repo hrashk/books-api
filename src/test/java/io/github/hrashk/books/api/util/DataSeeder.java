@@ -54,7 +54,7 @@ public final class DataSeeder {
     }
 
     public Iterable<Book> sampleBooks(int count) {
-        return generateSample(count, this::aRandomBook, b -> b);
+        return generateSample(count, this::aRandomBook, b -> b.getTitle() + "|" + b.getAuthor());
     }
 
     private <T> List<T> generateSample(int count, Supplier<T> entityGenerator, Function<? super T, ?> keyExtractor) {
