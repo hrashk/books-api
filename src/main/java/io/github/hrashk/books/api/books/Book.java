@@ -1,7 +1,6 @@
 package io.github.hrashk.books.api.books;
 
 import io.github.hrashk.books.api.categories.Category;
-import io.github.hrashk.books.api.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class Book implements BaseEntity {
+public class Book {
     @Id
     @GeneratedValue
     private Long id;

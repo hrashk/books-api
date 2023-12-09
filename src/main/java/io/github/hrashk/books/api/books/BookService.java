@@ -2,18 +2,21 @@ package io.github.hrashk.books.api.books;
 
 import io.github.hrashk.books.api.categories.Category;
 import io.github.hrashk.books.api.categories.CategoryService;
-import io.github.hrashk.books.api.common.BaseService;
+import io.github.hrashk.books.api.common.CrudService;
 import io.github.hrashk.books.api.exceptions.EntityNotFoundException;
+import io.github.hrashk.books.api.util.BeanCopyUtils;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class BookService extends BaseService<Book, BookRepository> {
+public class BookService implements CrudService<Book, Long> {
+    private final BookRepository repository;
     private final CategoryService categoryService;
 
     public BookService(BookRepository repository, CategoryService categoryService) {
-        super(repository, "Book");
+        this.repository = repository;
         this.categoryService = categoryService;
     }
 
@@ -31,18 +34,26 @@ public class BookService extends BaseService<Book, BookRepository> {
                         "No book found with title '%s' by %s".formatted(title, author)));
     }
 
+    @Transactional
     @Override
     public Long add(Book book) {
         getOrAddCategory(book);
 
-        return super.add(book);
+        return repository.save(book).getId();
     }
 
+    @Transactional
     @Override
     public Long updateOrAdd(Long id, Book book) {
-        getOrAddCategory(book);
+        if (!repository.existsById(id)) {
+            return add(book);
+        }
 
-        return super.updateOrAdd(id, book);
+        getOrAddCategory(book);
+        Book current = findById(id);
+        BeanCopyUtils.copyProperties(book, current);
+
+        return repository.save(current).getId();
     }
 
     private void getOrAddCategory(Book book) {
@@ -51,5 +62,17 @@ public class BookService extends BaseService<Book, BookRepository> {
         Category category = categoryService.getOrAdd(categoryName);
 
         book.setCategory(category);
+    }
+
+    @Override
+    public Book findById(Long id) throws EntityNotFoundException {
+        return repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Book", id));
+    }
+
+    @Override
+    @Transactional
+    public void deleteById(Long id) throws EntityNotFoundException {
+        repository.delete(findById(id));
     }
 }
