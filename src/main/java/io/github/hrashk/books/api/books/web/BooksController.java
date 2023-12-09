@@ -3,6 +3,7 @@ package io.github.hrashk.books.api.books.web;
 import io.github.hrashk.books.api.books.Book;
 import io.github.hrashk.books.api.books.BookService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ public class BooksController {
     }
 
     @GetMapping("/by-category")
-    public ResponseEntity<BookListResponse> findByCategory(@RequestParam String category) {
+    public ResponseEntity<BookListResponse> findByCategory(@RequestParam @NotBlank String category) {
         List<Book> books = service.findByCategory(category);
 
         BookListResponse response = mapper.wrap(books);
@@ -38,7 +39,8 @@ public class BooksController {
     }
 
     @GetMapping("/by-title-and-author")
-    public ResponseEntity<BookResponse> findByTitleAndAuthor(@RequestParam String title, @RequestParam String author) {
+    public ResponseEntity<BookResponse> findByTitleAndAuthor(
+            @RequestParam @NotBlank String title, @RequestParam @NotBlank String author) {
         Book book = service.findByTitleAndAuthor(title, author);
 
         BookResponse response = mapper.map(book);
