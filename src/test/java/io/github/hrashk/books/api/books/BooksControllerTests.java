@@ -189,6 +189,30 @@ public class BooksControllerTests extends ControllerTest {
     }
 
     @Test
+    void transformBookIntoAnother() {
+        String newCategory = "random-cat";
+        var book1 = seeder.books().get(0);
+        var book2 = seeder.books().get(1);
+        UpsertRequest request = new UpsertRequest(book1.getTitle(), book1.getAuthor(), newCategory);
+
+        ResponseEntity<BookResponse> response = put(BOOKS_ID_URL, request, BookResponse.class, book2.getId());
+
+        assertAll(
+                () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FOUND),
+                () -> assertThat(response.getBody()).hasNoNullFieldsOrProperties(),
+                () -> assertThat(response.getBody().category()).isEqualTo(newCategory),
+                () -> assertThat(response.getBody().id()).isEqualTo(book1.getId())
+        );
+
+        ResponseEntity<ErrorInfo> findResponse = rest.getForEntity(BOOKS_ID_URL, ErrorInfo.class, book2.getId());
+
+        assertAll(
+                () -> assertThat(findResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND),
+                () -> assertThat(findResponse.getBody().message()).contains("Book")
+        );
+    }
+
+    @Test
     void updateMissing() {
         UpsertRequest request = new UpsertRequest("t", "a", "c");
 

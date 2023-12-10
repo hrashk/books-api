@@ -74,6 +74,7 @@ public class BookService implements CrudService<Book, Long> {
         if (byProperties.isEmpty() || Objects.equals(byProperties.get().getId(), id)) {
             return CrudResult.updated(saveCopy(book, byId.get()));
         } else {
+            repository.delete(byId.get());
             return CrudResult.found(saveCopy(book, byProperties.get()));
         }
     }

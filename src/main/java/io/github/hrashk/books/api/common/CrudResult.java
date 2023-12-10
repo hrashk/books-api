@@ -1,15 +1,15 @@
 package io.github.hrashk.books.api.common;
 
 public record CrudResult<ID>(Status status, ID id) {
-    public static CrudResult<Long> found(Long id) {
+    public static <ID> CrudResult<ID> found(ID id) {
         return new CrudResult<>(Status.FOUND, id);
     }
 
-    public static CrudResult<Long> updated(Long newId) {
+    public static <ID> CrudResult<ID> updated(ID newId) {
         return new CrudResult<>(Status.UPDATED, newId);
     }
 
-    public static CrudResult<Long> created(Long newId) {
+    public static <ID> CrudResult<ID> created(ID newId) {
         return new CrudResult<>(Status.CREATED, newId);
     }
 
