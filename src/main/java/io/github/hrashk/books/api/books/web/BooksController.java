@@ -2,16 +2,17 @@ package io.github.hrashk.books.api.books.web;
 
 import io.github.hrashk.books.api.books.Book;
 import io.github.hrashk.books.api.books.BookService;
+import io.github.hrashk.books.api.common.CrudResult;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequestMapping(value = "/api/v1/books", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -57,27 +58,16 @@ public class BooksController {
 
     @PostMapping
     public ResponseEntity<BookResponse> add(@RequestBody @Valid UpsertRequest request) {
-        Long id = service.add(mapper.map(request));
+        var result = service.add(mapper.map(request));
 
-        BookResponse response = mapper.map(service.findById(id));
-
-        return created(response);
-    }
-
-    private static ResponseEntity<BookResponse> created(BookResponse response) {
-        return ResponseEntity.created(URI.create("/" + response.id())).body(response);
+        return map(result);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<BookResponse> update(@PathVariable Long id, @RequestBody @Valid UpsertRequest request) {
-        Long newId = service.updateOrAdd(id, mapper.map(request));
+        var result = service.update(id, mapper.map(request));
 
-        BookResponse response = mapper.map(service.findById(newId));
-
-        if (Objects.equals(newId, id))
-            return ResponseEntity.ok(response);
-        else
-            return created(response);
+        return map(result);
     }
 
     @DeleteMapping("/{id}")
@@ -86,4 +76,16 @@ public class BooksController {
 
         return ResponseEntity.noContent().build();
     }
+
+    private ResponseEntity<BookResponse> map(CrudResult<Long> result) {
+        BookResponse response = mapper.map(service.findById(result.id()));
+
+        return switch (result.status()) {
+            case UPDATED -> ResponseEntity.ok(response);
+            case CREATED -> ResponseEntity.created(URI.create("/" + response.id())).body(response);
+            case FOUND -> ResponseEntity.status(HttpStatus.FOUND)
+                    .location(URI.create("/" + response.id())).body(response);
+        };
+    }
+
 }

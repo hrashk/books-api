@@ -129,9 +129,10 @@ public class BooksControllerTests extends ControllerTest {
         ResponseEntity<BookResponse> response = rest.postForEntity(BOOKS_URL, request, BookResponse.class);
 
         assertAll(
-                () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED),
+                () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FOUND),
                 () -> assertThat(response.getBody()).hasNoNullFieldsOrProperties(),
-                () -> assertThat(response.getBody().category()).isEqualTo(newCategory)
+                () -> assertThat(response.getBody().category()).isEqualTo(newCategory),
+                () -> assertThat(response.getBody().id()).isEqualTo(book.getId())
         );
 
         ResponseEntity<BookResponse> findResponse = rest.getForEntity(BOOKS_URL
@@ -140,7 +141,9 @@ public class BooksControllerTests extends ControllerTest {
 
         assertAll(
                 () -> assertThat(findResponse.getStatusCode()).isEqualTo(HttpStatus.OK),
-                () -> assertThat(findResponse.getBody()).hasNoNullFieldsOrProperties()
+                () -> assertThat(findResponse.getBody()).hasNoNullFieldsOrProperties(),
+                () -> assertThat(response.getBody().category()).isEqualTo(newCategory),
+                () -> assertThat(response.getBody().id()).isEqualTo(book.getId())
         );
     }
 
