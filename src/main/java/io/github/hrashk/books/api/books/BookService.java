@@ -7,6 +7,7 @@ import io.github.hrashk.books.api.common.CrudService;
 import io.github.hrashk.books.api.exceptions.EntityNotFoundException;
 import io.github.hrashk.books.api.util.BeanCopyUtils;
 import jakarta.transaction.Transactional;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,10 +27,12 @@ public class BookService implements CrudService<Book, Long> {
         return repository.findAll();
     }
 
+    @Cacheable("books")
     public List<Book> findByCategory(String category) {
         return repository.findByCategoryName(category);
     }
 
+    @Cacheable("books")
     public Book findByTitleAndAuthor(String title, String author) {
         return repository.findByTitleAndAuthor(title, author)
                 .orElseThrow(() -> new EntityNotFoundException(
