@@ -1,4 +1,12 @@
 spring:
+  cache:
+    type: redis
+    redis:
+      time-to-live: 60000
+  data:
+    redis:
+      host: localhost
+      port: 6379
   datasource:
     url: jdbc:postgresql://localhost:5432/books?currentSchema=books_schema
     username: postgres
@@ -9,5 +17,3 @@ spring:
   jpa:
     generate-ddl: true
     open-in-view: false
-
-

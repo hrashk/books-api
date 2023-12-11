@@ -10,7 +10,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 @DataJpaTest(properties = {"logging.level.org.hibernate.orm.jdbc.bind=trace"})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ContextConfiguration(initializers = PostgresInitializer.class)
+@ContextConfiguration(initializers = {PostgresInitializer.class, RedisInitializer.class})
 @Import(DataSeeder.class)
 public abstract class ServiceTest {
     @Autowired

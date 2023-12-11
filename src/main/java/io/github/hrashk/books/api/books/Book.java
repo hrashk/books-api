@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Entity
 @Table(name = "books",
         uniqueConstraints = @UniqueConstraint(name = "UniqueTitleAndAuthor", columnNames = {"title", "author"}))
@@ -14,7 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class Book {
+public class Book implements Serializable {
     @Id
     @GeneratedValue
     private Long id;

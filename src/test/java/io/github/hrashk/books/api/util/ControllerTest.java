@@ -12,7 +12,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ContextConfiguration(initializers = PostgresInitializer.class)
+@ContextConfiguration(initializers = {PostgresInitializer.class, RedisInitializer.class})
 @Import(DataSeeder.class)
 public abstract class ControllerTest {
     protected static final Long INVALID_ID = 111222333L;
