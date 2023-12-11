@@ -6,7 +6,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
-public class PostgreSQLInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+public class PostgresInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     private static final PostgreSQLContainer<?> POSTGRE_SQL_CONTAINER = new PostgreSQLContainer<>("postgres:16-alpine")
             .withUsername("postgres")
