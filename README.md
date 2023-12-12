@@ -40,6 +40,10 @@ java -jar target/books-api-0.0.1-SNAPSHOT.jar
 ## Available commands
 
 The rest api services manages books using a Redis cache for search results.
+The app keeps a single copy of a book with the same title and author. It handles the add and update operations
+cleverly so that the unique constraint is not violated, e.g. by modifying an existing book rather than creating
+a new one. Similarly, the category names are kept unique. Refer to the javadoc and test cases for further details. 
+
 The following URL shows the Swagger / Open API documentation of the available end points. Here you may try out
 individual requests.
 

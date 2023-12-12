@@ -2,6 +2,9 @@ package io.github.hrashk.books.api.books.web;
 
 import io.github.hrashk.books.api.books.Book;
 import io.github.hrashk.books.api.books.BookService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +56,13 @@ public class BooksController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Add a new book")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "A new book was added"),
+            @ApiResponse(responseCode = "302", description = "A book was found with the same title and author." +
+                    " It was updated instead of creating a new one"),
+            @ApiResponse(responseCode = "404", description = "Book not found")
+    })
     @PostMapping
     public ResponseEntity<BookResponse> add(@RequestBody @Valid UpsertRequest request) {
         var result = service.add(mapper.map(request));
@@ -60,6 +70,15 @@ public class BooksController {
         return mapper.map(result);
     }
 
+
+    @Operation(summary = "Update a book")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "The book was updated"),
+            @ApiResponse(responseCode = "201", description = "There was no book with the provided id," +
+                    " so a new book was added"),
+            @ApiResponse(responseCode = "302", description = "A book was found with the same title and author." +
+                    " It was updated instead of that with the provided id. The original book was deleted.")
+    })
     @PutMapping("/{id}")
     public ResponseEntity<BookResponse> update(@PathVariable Long id, @RequestBody @Valid UpsertRequest request) {
         var result = service.update(id, mapper.map(request));
