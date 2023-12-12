@@ -78,9 +78,21 @@ public class BookService implements CrudService<Book, Long> {
         if (byProperties.isEmpty() || Objects.equals(byProperties.get().getId(), id)) {
             return CrudResult.updated(saveCopy(book, byId.get()));
         } else {
-            repository.delete(byId.get());
+            delete(byId.get());
             return CrudResult.found(saveCopy(book, byProperties.get()));
         }
+    }
+
+    @Override
+    public Book findById(Long id) throws EntityNotFoundException {
+        return repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Book", id));
+    }
+
+    @Override
+    @Transactional
+    public void deleteById(Long id) throws EntityNotFoundException {
+        delete(findById(id));
     }
 
     private Long save(Book book) {
@@ -97,6 +109,12 @@ public class BookService implements CrudService<Book, Long> {
         return repository.save(into).getId();
     }
 
+    private void delete(Book book) {
+        evict(book);
+
+        repository.delete(book);
+    }
+
     private void evict(Book book) {
         cacheManager.getCache(BOOKS).evict(book.getCategory().getName());
         cacheManager.getCache(BOOKS).evict(new SimpleKey(book.getTitle(), book.getAuthor()));
@@ -108,17 +126,5 @@ public class BookService implements CrudService<Book, Long> {
         Category category = categoryService.getOrAdd(categoryName);
 
         book.setCategory(category);
-    }
-
-    @Override
-    public Book findById(Long id) throws EntityNotFoundException {
-        return repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Book", id));
-    }
-
-    @Override
-    @Transactional
-    public void deleteById(Long id) throws EntityNotFoundException {
-        repository.delete(findById(id));
     }
 }

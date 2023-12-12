@@ -172,4 +172,37 @@ class BookServiceTest extends ServiceTest {
                         .isEqualTo(similarBook)
         );
     }
+
+    @Test
+    void updateAsMerge() {
+        Book book1 = seeder.detachedBookCopy(0);
+        String categoryName1 = book1.getCategory().getName();
+
+        Book book2 = seeder.detachedBookCopy(1);
+        String categoryName2 = book2.getCategory().getName();
+
+        String newCategory = "new category";
+
+        // cache things
+        int size1 = service.findByCategory(categoryName1).size();
+        int size2 = service.findByCategory(categoryName2).size();
+        service.findByTitleAndAuthor(book1.getTitle(), book1.getAuthor());
+        service.findByTitleAndAuthor(book2.getTitle(), book2.getAuthor());
+
+        // modify first book to become similar to the second one
+        Book similarBook = book2.toBuilder().category(new Category().toBuilder().name(newCategory).build()).build();
+        CrudResult<Long> result = service.update(book1.getId(), similarBook);
+
+        // check the caches are modified
+        assertAll(
+                () -> assertThat(result.status()).isEqualTo(CrudResult.Status.FOUND),
+                () -> assertThat(service.findByCategory(categoryName1)).hasSize(size1 - 1),
+                () -> assertThat(service.findByCategory(categoryName2)).hasSize(size2 - 1),
+                () -> assertThat(service.findByCategory(newCategory)).hasSize(1),
+                () -> assertThat(service.findByTitleAndAuthor(book2.getTitle(), book2.getAuthor()))
+                        .isEqualTo(similarBook),
+                () -> assertThatThrownBy(() -> service.findByTitleAndAuthor(book1.getTitle(), book1.getAuthor()))
+                        .isInstanceOf(EntityNotFoundException.class)
+        );
+    }
 }
