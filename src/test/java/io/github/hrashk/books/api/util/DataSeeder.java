@@ -11,6 +11,7 @@ import net.datafaker.Faker;
 import org.springframework.boot.test.context.TestComponent;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -84,5 +85,18 @@ public final class DataSeeder {
 
     private <T> T randomItem(List<T> items) {
         return items.get(random.nextInt(items.size()));
+    }
+
+    public Category aDifferentCategoryFrom(String category) {
+        return categories.stream()
+                .filter(c -> !Objects.equals(c.getName(), category))
+                .findAny().get();
+    }
+
+    /**
+     * Detached copies are not modified when the original is saved by the repository.
+     */
+    public Book detachedBookCopy(int index) {
+        return books.get(index).toBuilder().build();
     }
 }

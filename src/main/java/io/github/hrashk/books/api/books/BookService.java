@@ -10,6 +10,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.interceptor.SimpleKey;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -83,16 +84,22 @@ public class BookService implements CrudService<Book, Long> {
     }
 
     private Long save(Book book) {
-        cacheManager.getCache(BOOKS).evict(book.getCategory().getName());
+        evict(book);
 
         return repository.save(book).getId();
     }
 
     private Long saveCopy(Book from, Book into) {
-        cacheManager.getCache(BOOKS).evict(into.getCategory().getName());
+        evict(from);
+        evict(into);
 
         BeanCopyUtils.copyProperties(from, into);
         return repository.save(into).getId();
+    }
+
+    private void evict(Book book) {
+        cacheManager.getCache(BOOKS).evict(book.getCategory().getName());
+        cacheManager.getCache(BOOKS).evict(new SimpleKey(book.getTitle(), book.getAuthor()));
     }
 
     private void getOrAddCategory(Book book) {
