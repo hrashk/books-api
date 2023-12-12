@@ -1,6 +1,7 @@
 package io.github.hrashk.books.api.books;
 
 import io.github.hrashk.books.api.CachingConfig;
+import io.github.hrashk.books.api.categories.Category;
 import io.github.hrashk.books.api.categories.CategoryService;
 import io.github.hrashk.books.api.common.CrudResult;
 import io.github.hrashk.books.api.util.ServiceTest;
@@ -29,7 +30,7 @@ class BookServiceTest extends ServiceTest {
 
     @BeforeEach
     void setUpCache() {
-        cache = cacheManager.getCache("books");
+        cache = cacheManager.getCache(BookService.BOOKS);
         assertThat(cache).as("Cache").isNotNull();
         cache.clear();
     }
@@ -62,7 +63,7 @@ class BookServiceTest extends ServiceTest {
     }
 
     @Test
-    void addingNewBookInvalidatesCategoryCache() {
+    void addNewBook() {
         Book book = seeder.books().get(0);
         String category = book.getCategory().getName();
 
@@ -73,10 +74,29 @@ class BookServiceTest extends ServiceTest {
         CrudResult<Long> result = service.add(anotherBookWithSameCategory);
         assertAll(
                 () -> assertThat(result.status()).isEqualTo(CrudResult.Status.CREATED),
-                () -> assertThat(cache.get(category)).as("Invalidated cache").isNull()
+                () -> assertThat(service.findByCategory(category)).hasSize(originalSize + 1)
         );
+    }
 
-        int size = service.findByCategory(category).size();
-        assertThat(size).isEqualTo(originalSize + 1);
+    @Test
+    void addSimilarBook() {
+        Book book = seeder.books().get(0);
+        String category = book.getCategory().getName();
+
+        int originalSize = service.findByCategory(category).size();
+        assertThat(cache.get(category)).as("Original cache").isNotNull();
+
+        String newCategory = "random-cat";
+        Book similarBook = book.toBuilder()
+                .category(new Category().toBuilder().name(newCategory).build())
+                .build();
+        CrudResult<Long> result = service.add(similarBook);
+
+        assertAll(
+                () -> assertThat(result.status()).isEqualTo(CrudResult.Status.FOUND),
+                () -> assertThat(service.findByCategory(category)).hasSize(originalSize - 1),
+                () -> assertThat(service.findByTitleAndAuthor(similarBook.getTitle(), similarBook.getAuthor()))
+                        .isEqualTo(similarBook)
+        );
     }
 }

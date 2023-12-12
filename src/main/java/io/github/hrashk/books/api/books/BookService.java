@@ -18,6 +18,7 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class BookService implements CrudService<Book, Long> {
+    static final String BOOKS = "books";
     private final BookRepository repository;
     private final CategoryService categoryService;
     private final CacheManager cacheManager;
@@ -26,12 +27,12 @@ public class BookService implements CrudService<Book, Long> {
         return repository.findAll();
     }
 
-    @Cacheable("books")
+    @Cacheable(BOOKS)
     public List<Book> findByCategory(String category) {
         return repository.findByCategoryName(category);
     }
 
-    @Cacheable("books")
+    @Cacheable(BOOKS)
     public Book findByTitleAndAuthor(String title, String author) {
         return repository.findByTitleAndAuthor(title, author)
                 .orElseThrow(() -> new EntityNotFoundException(
@@ -82,11 +83,14 @@ public class BookService implements CrudService<Book, Long> {
     }
 
     private Long save(Book book) {
-        cacheManager.getCache("books").evict(book.getCategory().getName());
+        cacheManager.getCache(BOOKS).evict(book.getCategory().getName());
+
         return repository.save(book).getId();
     }
 
     private Long saveCopy(Book from, Book into) {
+        cacheManager.getCache(BOOKS).evict(into.getCategory().getName());
+
         BeanCopyUtils.copyProperties(from, into);
         return repository.save(into).getId();
     }
