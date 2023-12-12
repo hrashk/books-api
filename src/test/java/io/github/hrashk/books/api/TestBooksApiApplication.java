@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 
 @TestConfiguration(proxyBeanMethods = false)
 @Import(DataSeeder.class)
@@ -17,13 +18,16 @@ public class TestBooksApiApplication {
     @Bean
     @ServiceConnection
     PostgreSQLContainer<?> postgresContainer() {
-        return new PostgreSQLContainer<>("postgres:16-alpine");
+        return new PostgreSQLContainer<>("postgres:16-alpine")
+                .waitingFor(Wait.forListeningPort());
     }
 
     @Bean
     @ServiceConnection(name = "redis")
     GenericContainer<?> redisContainer() {
-        return new GenericContainer<>("redis:7-alpine").withExposedPorts(6379);
+        return new GenericContainer<>("redis:7-alpine")
+                .withExposedPorts(6379)
+                .waitingFor(Wait.forListeningPort());
     }
 
     @Bean

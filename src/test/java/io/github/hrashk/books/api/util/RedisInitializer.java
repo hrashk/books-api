@@ -17,7 +17,7 @@ public class RedisInitializer implements ApplicationContextInitializer<Configura
         REDIS_CONTAINER.start();
         TestPropertyValues.of(
                 "spring.data.redis.host=" + REDIS_CONTAINER.getHost(),
-                "spring.data.redis.port=" + REDIS_CONTAINER.getExposedPorts().get(0)
+                "spring.data.redis.port=" + REDIS_CONTAINER.getMappedPort(6379)
         ).applyTo(applicationContext.getEnvironment());
     }
 }
