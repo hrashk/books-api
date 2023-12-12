@@ -178,7 +178,7 @@ class BookServiceTest extends ServiceTest {
         Book book1 = seeder.detachedBookCopy(0);
         String categoryName1 = book1.getCategory().getName();
 
-        Book book2 = seeder.detachedBookCopy(1);
+        Book book2 = seeder.aDifferentCategoryBook(book1).toBuilder().build();
         String categoryName2 = book2.getCategory().getName();
 
         String newCategory = "new category";
@@ -202,6 +202,26 @@ class BookServiceTest extends ServiceTest {
                 () -> assertThat(service.findByTitleAndAuthor(book2.getTitle(), book2.getAuthor()))
                         .isEqualTo(similarBook),
                 () -> assertThatThrownBy(() -> service.findByTitleAndAuthor(book1.getTitle(), book1.getAuthor()))
+                        .isInstanceOf(EntityNotFoundException.class)
+        );
+    }
+
+    @Test
+    void delete() {
+        Book book = seeder.detachedBookCopy(0);
+        String categoryName = book.getCategory().getName();
+
+        // cache things
+        int size = service.findByCategory(categoryName).size();
+        service.findByTitleAndAuthor(book.getTitle(), book.getAuthor());
+
+        // modify
+        service.deleteById(book.getId());
+
+        // check the caches are modified
+        assertAll(
+                () -> assertThat(service.findByCategory(categoryName)).hasSize(size - 1),
+                () -> assertThatThrownBy(() -> service.findByTitleAndAuthor(book.getTitle(), book.getAuthor()))
                         .isInstanceOf(EntityNotFoundException.class)
         );
     }

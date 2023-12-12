@@ -93,6 +93,12 @@ public final class DataSeeder {
                 .findAny().get();
     }
 
+    public Book aDifferentCategoryBook(Book book) {
+        return books.stream()
+                .filter(b -> !Objects.equals(b.getCategory().getName(), book.getCategory().getName()))
+                .findAny().get();
+    }
+
     /**
      * Detached copies are not modified when the original is saved by the repository.
      */
