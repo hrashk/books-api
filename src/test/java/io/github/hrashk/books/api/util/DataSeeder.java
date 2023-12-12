@@ -75,13 +75,11 @@ public final class DataSeeder {
     }
 
     public Book aRandomBook() {
-        Book book = new Book().toBuilder()
+        return new Book().toBuilder()
                 .title(faker.book().title())
                 .author(faker.book().author())
                 .category(randomItem(categories))
                 .build();
-
-        return book;
     }
 
     private <T> T randomItem(List<T> items) {

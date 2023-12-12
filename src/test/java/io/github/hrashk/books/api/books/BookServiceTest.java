@@ -2,7 +2,9 @@ package io.github.hrashk.books.api.books;
 
 import io.github.hrashk.books.api.CachingConfig;
 import io.github.hrashk.books.api.categories.CategoryService;
+import io.github.hrashk.books.api.common.CrudResult;
 import io.github.hrashk.books.api.util.ServiceTest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
@@ -13,19 +15,27 @@ import org.springframework.context.annotation.Import;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @Import({BookService.class, CategoryService.class, CachingConfig.class})
 class BookServiceTest extends ServiceTest {
+    protected Cache cache;
+
     @Autowired
     private CacheManager cacheManager;
+
     @Autowired
     private BookService service;
 
+    @BeforeEach
+    void setUpCache() {
+        cache = cacheManager.getCache("books");
+        assertThat(cache).as("Cache").isNotNull();
+        cache.clear();
+    }
+
     @Test
     void findByCategory() {
-        Cache cache = cacheManager.getCache("books");
-        assertThat(cache).as("Cache").isNotNull();
-
         Book book = seeder.books().get(0);
         String category = book.getCategory().getName();
 
@@ -42,9 +52,6 @@ class BookServiceTest extends ServiceTest {
 
     @Test
     void findByTitleAndAuthor() {
-        Cache cache = cacheManager.getCache("books");
-        assertThat(cache).as("Cache").isNotNull();
-
         Book book = seeder.books().get(0);
         Book foundBook = service.findByTitleAndAuthor(book.getTitle(), book.getAuthor());
         assertThat(foundBook).isEqualTo(book);
@@ -52,5 +59,24 @@ class BookServiceTest extends ServiceTest {
         SimpleKey key = new SimpleKey(book.getTitle(), book.getAuthor());
         Book cachedBook = cache.get(key, Book.class);
         assertThat(cachedBook).isEqualTo(book);
+    }
+
+    @Test
+    void addingNewBookInvalidatesCategoryCache() {
+        Book book = seeder.books().get(0);
+        String category = book.getCategory().getName();
+
+        int originalSize = service.findByCategory(category).size();
+        assertThat(cache.get(category)).as("Original cache").isNotNull();
+
+        Book anotherBookWithSameCategory = seeder.aRandomBook().toBuilder().category(book.getCategory()).build();
+        CrudResult<Long> result = service.add(anotherBookWithSameCategory);
+        assertAll(
+                () -> assertThat(result.status()).isEqualTo(CrudResult.Status.CREATED),
+                () -> assertThat(cache.get(category)).as("Invalidated cache").isNull()
+        );
+
+        int size = service.findByCategory(category).size();
+        assertThat(size).isEqualTo(originalSize + 1);
     }
 }

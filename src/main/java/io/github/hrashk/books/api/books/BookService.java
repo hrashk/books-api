@@ -7,6 +7,8 @@ import io.github.hrashk.books.api.common.CrudService;
 import io.github.hrashk.books.api.exceptions.EntityNotFoundException;
 import io.github.hrashk.books.api.util.BeanCopyUtils;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -14,14 +16,11 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
+@RequiredArgsConstructor
 public class BookService implements CrudService<Book, Long> {
     private final BookRepository repository;
     private final CategoryService categoryService;
-
-    public BookService(BookRepository repository, CategoryService categoryService) {
-        this.repository = repository;
-        this.categoryService = categoryService;
-    }
+    private final CacheManager cacheManager;
 
     public List<Book> findAll() {
         return repository.findAll();
@@ -83,6 +82,7 @@ public class BookService implements CrudService<Book, Long> {
     }
 
     private Long save(Book book) {
+        cacheManager.getCache("books").evict(book.getCategory().getName());
         return repository.save(book).getId();
     }
 
