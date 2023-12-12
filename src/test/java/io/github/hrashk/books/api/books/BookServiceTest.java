@@ -145,4 +145,31 @@ class BookServiceTest extends ServiceTest {
                         .isEqualTo(modifiedBook)
         );
     }
+
+    @Test
+    void updateCategory() {
+        Book book = seeder.detachedBookCopy(0);
+        String categoryName1 = book.getCategory().getName();
+
+        Category category2 = seeder.aDifferentCategoryFrom(categoryName1);
+        String categoryName2 = category2.getName();
+
+        // cache things
+        int size1 = service.findByCategory(categoryName1).size();
+        int size2 = service.findByCategory(categoryName2).size();
+        service.findByTitleAndAuthor(book.getTitle(), book.getAuthor());
+
+        // modify
+        Book similarBook = book.toBuilder().category(category2).build();
+        CrudResult<Long> result = service.update(book.getId(), similarBook);
+
+        // check the caches are modified
+        assertAll(
+                () -> assertThat(result.status()).isEqualTo(CrudResult.Status.UPDATED),
+                () -> assertThat(service.findByCategory(categoryName1)).hasSize(size1 - 1),
+                () -> assertThat(service.findByCategory(categoryName2)).hasSize(size2 + 1),
+                () -> assertThat(service.findByTitleAndAuthor(book.getTitle(), book.getAuthor()))
+                        .isEqualTo(similarBook)
+        );
+    }
 }
